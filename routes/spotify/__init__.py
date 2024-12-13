@@ -1,11 +1,23 @@
 import bs4
+import logging
+from .models import *
+from fastapi import APIRouter, Depends, Request
 
-class Spotify:
-    def song(id: str) -> dict:
-        pass
-    
-    def playlist(id: str) -> dict:
-        pass
-    
-    def artist(id: str) -> dict:
-        pass
+logger = logging.getLogger(__name__)
+router = APIRouter(
+    prefix="/spotify",
+    tags=["spotify", "provider"],
+    responses={404: {"description": "Not found"}},
+)
+
+@router.get("/track", response_model=Song)
+def track(id_: str):
+    pass
+
+@router.get()
+def playlist(id_: str):
+    pass
+
+@router.get()
+def artist(id_: str):
+    pass
