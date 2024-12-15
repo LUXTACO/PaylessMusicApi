@@ -1,19 +1,5 @@
 from typing import List
 
-class Artist:
-    id_: str
-    url: str
-    name: str
-    followers: int
-    is_verified: bool
-    monthly_listeners: int
-    listeners_location: dict
-    
-    def add_attribute(self, key: str, value: str):
-        #> popular_tracks | popular_discography
-        #? List of popular |albums/tracks| normally 5 unless user specifies otherwise
-        setattr(self, key, value)
-
 class Track:
     id_: str
     url: str
@@ -28,20 +14,6 @@ class Track:
         #? List of recommended |albums/tracks/posts/recommendations|, normally 5 unless user specifies otherwise
         setattr(self, key, value)
     
-class Album: 
-    id_: str
-    url: str
-    name: str
-    duration: int
-    release_date: str
-    tracks: List[mTrack]
-    artists: List[mArtist]
-    
-    def add_attribute(self, key: str, value: str):
-        #> artist_other_albums
-        #? List of other albums by the artist, normally 5 unless user specifies otherwise
-        setattr(self, key, value)
-    
 class Playlist:
     id_: str
     url: str
@@ -54,6 +26,34 @@ class Playlist:
     def add_attribute(self, key: str, value: str):
         #> similar_content
         #? List of similar content, normally 5 unless user specifies otherwise
+        setattr(self, key, value)
+        
+class Artist:
+    id_: str
+    url: str
+    name: str
+    followers: int
+    is_verified: bool
+    monthly_listeners: int
+    listeners_location: dict
+    
+    def add_attribute(self, key: str, value: str):
+        #> popular_tracks | popular_discography
+        #? List of popular |albums/tracks| normally 5 unless user specifies otherwise
+        setattr(self, key, value)
+
+class Album: 
+    id_: str
+    url: str
+    name: str
+    duration: int
+    release_date: str
+    tracks: List[mTrack]
+    artists: List[mArtist]
+    
+    def add_attribute(self, key: str, value: str):
+        #> artist_other_albums
+        #? List of other albums by the artist, normally 5 unless user specifies otherwise
         setattr(self, key, value)
     
 #% Minified version of the track class 
