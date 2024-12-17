@@ -26,7 +26,7 @@ class Wrapper:
         })), headers=self.get_headers())
         if response.status_code == 200:
             logger.info("Successfully retrieved track from Spotify.")
-            return response.json()
+            return response.json()["data"]
         else:
             logger.error(f"Failed to retrieve track from Spotify. Status code: {response.status_code}")
             return False
@@ -58,9 +58,9 @@ class Wrapper:
                     logger.info("Found session script tag.")
                     session_data = script_tag.string
                     session_json = json.loads(session_data)
-                    self.access_token = session_json.get("accessToken")
+                    self.access_token = session_json["accessToken"]
                     self.access_token_timestamp = datetime.datetime.now()
-                    self.client_id = session_json.get("clientId")
+                    self.client_id = session_json["clientId"]
                     logger.info("Access token and client ID retrieved successfully.")
                     logger.debug(f"Access token: {self.access_token}")
                     logger.debug(f"Client ID: {self.client_id}")
@@ -101,9 +101,3 @@ class Wrapper:
             else:
                 logger.error(f"Failed to retrieve client token. Status code: {response.status_code}. Retrying in 2 seconds...")
                 time.sleep(2)
-
-#? Unit test
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
-    wrapper = Wrapper()
-    print(wrapper.get_track("68IdCDcjQGPD2OjJ5l6KQL"))
