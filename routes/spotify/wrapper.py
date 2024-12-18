@@ -32,11 +32,11 @@ class Wrapper:
             logger.error(f"Failed to retrieve track from Spotify. Status code: {response.status_code}")
             return False
     
-    def get_playlist(self, playlist_id: str, offset: int = 0, limit: int = 50) -> bool|dict:
+    def get_playlist(self, playlist_id: str, offset: int, limit: int) -> bool|dict:
         logger.info("Getting playlist from Spotify...")
         response = requests.get(("https://api-partner.spotify.com/pathfinder/v1/query?" + urllib.parse.urlencode({
             "operationName": "fetchPlaylist",
-            "variables": json.dumps({"uri": f"spotify:playlist:{playlist_id}", "offset": offset, "limit": limit}),
+            "variables": json.dumps({"uri": f"spotify:playlist:{playlist_id}", "offset": offset, "limit": limit}), #? default limit is 50 and offset is 0
             "extensions": json.dumps({"persistedQuery": {"version": 1, "sha256Hash": "19ff1327c29e99c208c86d7a9d8f1929cfdf3d3202a0ff4253c821f1901aa94d"}})
             #? sha256Hash might need to be updated if the query changes
         })), headers=self.get_headers())
@@ -48,10 +48,32 @@ class Wrapper:
             return False
     
     def get_artist(self, artist_id: str) -> bool|dict:
-        pass
+        logger.info("Getting artist from Spotify...")
+        response = requests.get(("https://api-partner.spotify.com/pathfinder/v1/query?" + urllib.parse.urlencode({
+            "operationName": "queryArtistOverview",
+            "variables": json.dumps({"uri": f"spotify:artist:{artist_id}", "locale": ""}),
+            "extensions": json.dumps({"persistedQuery": {"version":1,"sha256Hash":"4bc52527bb77a5f8bbb9afe491e9aa725698d29ab73bff58d49169ee29800167"}})
+        })), headers=self.get_headers())
+        if response.status_code == 200:
+            logger.info("Successfully retrieved artist from Spotify.")
+            return response.json()["data"]
+        else:
+            logger.error(f"Failed to retrieve artist from Spotify. Status code: {response.status_code}")
+            return False
     
-    def get_album(self, album_id: str) -> bool|dict:
-        pass
+    def get_album(self, album_id: str, offset: int, limit: int) -> bool|dict:
+        logger.info("Getting album from Spotify...")
+        response = requests.get(("https://api-partner.spotify.com/pathfinder/v1/query?" + urllib.parse.urlencode({
+            "operationName": "getAlbum",
+            "variables": json.dumps({"uri": f"spotify:album:{album_id}", "locale": "", "offset": offset, "limit": limit}), #? default limit is 50 and offset is 0
+            "extensions": json.dumps({"persistedQuery": {"version":1,"sha256Hash":"8f4cd5650f9d80349dbe68684057476d8bf27a5c51687b2b1686099ab5631589"}})
+        })), headers=self.get_headers())
+        if response.status_code == 200:
+            logger.info("Successfully retrieved playlist from Spotify.")
+            return response.json()["data"]
+        else:
+            logger.error(f"Failed to retrieve playlist from Spotify. Status code: {response.status_code}")
+            return False
     
     def get_headers(self):
         self._update_tokens()
@@ -127,5 +149,11 @@ class Wrapper:
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     wrapper = Wrapper()
+    print("\n\n Track")
     print(wrapper.get_track("1cOboCuWYI2osTOfolMRS6"))
-    print(wrapper.get_playlist("37i9dQZF1EVKuMoAJjoTIw"))
+    print("\n\n Playlist")
+    print(wrapper.get_playlist("37i9dQZF1EVKuMoAJjoTIw", 0, 50))
+    print("\n\n Artist")
+    print(wrapper.get_artist("5eumcnUkdmGvkvcsx1WFNG"))
+    print("\n\n Album")
+    print(wrapper.get_album("2op3VYOlPBj8PhFxLEQ0Ol", 0, 50))
