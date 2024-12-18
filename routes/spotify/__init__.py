@@ -1,5 +1,6 @@
 import logging
 from .models import *
+from .wrapper import Wrapper
 from fastapi import APIRouter, Depends, Request
 
 logger = logging.getLogger(__name__)
@@ -9,10 +10,10 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
-@router.get("/track", response_model=Song)
-def track(id_: str, get_recommendations: bool|int = False, get_a_pop_tracks: bool|int = False, get_a_pop_albums: bool|int = False, get_a_pop_posts: bool|int = False):
+@router.get("/track", response_model=Song|dict)
+def track(track_id: str):
     """
-    > id_: str
+    > track_id: str
         ? Song ID
     > get_recommendations: bool|int = False
         ? Get recommendations for the track, normally 5 unless user specifies otherwise
@@ -25,10 +26,10 @@ def track(id_: str, get_recommendations: bool|int = False, get_a_pop_tracks: boo
     """
     pass
 
-@router.get("/playlist", response_model=Playlist)
-def playlist(id_: str, track_count: int|str = "*", get_a_other_albums: bool|int = False): 
+@router.get("/playlist", response_model=Playlist|dict)
+def playlist(playlist_id: str): 
     """
-    > id_: str
+    > playlist_id: str
         ? Playlist ID
     > track_count: int|str = "*"
         ? Number of tracks to return, default is all (that are able to be scrapped from the playlist on first load)
@@ -37,10 +38,10 @@ def playlist(id_: str, track_count: int|str = "*", get_a_other_albums: bool|int 
     """
     pass
 
-@router.get("/artist", response_model=Artist)
-def artist(id_: str, get_popular_tracks: bool|int = False, get_popular_discography: bool|int = False):
+@router.get("/artist", response_model=Artist|dict)
+def artist(artist_id: str):
     """
-    > id_: str
+    > artist_id: str
         ? Artist ID
     > get_popular_tracks: bool|int = False
         ? Get the artist's popular tracks, normally 5 unless user specifies otherwise
@@ -49,10 +50,10 @@ def artist(id_: str, get_popular_tracks: bool|int = False, get_popular_discograp
     """
     pass
 
-@router.get("/album", response_model=Album)
-def album(id_: str, track_count: int|str = "*", get_a_other_albums: bool|int = False):
+@router.get("/album", response_model=Album|dict)
+def album(album_id: str):
     """
-    > id_: str
+    > album_id: str
         ? Album ID
     > track_count: int|str = "*"
         ? Number of tracks to return, default is all
