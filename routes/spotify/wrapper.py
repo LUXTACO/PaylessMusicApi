@@ -146,14 +146,3 @@ class Wrapper:
                 logger.error(f"Failed to retrieve client token. Status code: {response.status_code}. Retrying in 2 seconds...")
                 time.sleep(2)
                 
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
-    wrapper = Wrapper()
-    print("\n\n Track")
-    print(wrapper.get_track("1cOboCuWYI2osTOfolMRS6"))
-    print("\n\n Playlist")
-    print(wrapper.get_playlist("37i9dQZF1EVKuMoAJjoTIw", 0, 50))
-    print("\n\n Artist")
-    print(wrapper.get_artist("5eumcnUkdmGvkvcsx1WFNG"))
-    print("\n\n Album")
-    print(wrapper.get_album("2op3VYOlPBj8PhFxLEQ0Ol", 0, 50))
