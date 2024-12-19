@@ -1,63 +1,67 @@
 import logging
-from .models import *
 from .wrapper import Wrapper
 from fastapi import APIRouter, Depends, Request
 
 logger = logging.getLogger(__name__)
 router = APIRouter(
     prefix="/spotify",
-    tags=["spotify", "provider"],
+    tags=["Spotify"],
     responses={404: {"description": "Not found"}},
 )
+wrapper = Wrapper()
 
-@router.get("/track", response_model=Song|dict)
-def track(track_id: str):
+@router.get("/track")
+def track(track_id: str, get_raw: bool = False):
     """
-    > track_id: str
-        ? Song ID
-    > get_recommendations: bool|int = False
-        ? Get recommendations for the track, normally 5 unless user specifies otherwise
-    > get_a_pop_tracks: bool|int = False
-        ? Get the artist's popular tracks, normally 5 unless user specifies otherwise
-    > get_a_pop_albums: bool|int = False
-        ? Get the artist's popular albums, normally 5 unless user specifies otherwise
-    > get_a_pop_posts: bool|int = False
-        ? Get the artist's popular posts, normally 5 unless user specifies otherwise
+    % Get a track from Spotify
+        > track_id: str
+            ? Song ID
+        > get_raw: bool = False
+            ? Get the raw response from the API wrapper
     """
-    pass
+    if not get_raw:
+        pass
+    else:
+        return wrapper.get_track(track_id)
 
-@router.get("/playlist", response_model=Playlist|dict)
-def playlist(playlist_id: str): 
+@router.get("/playlist")
+def playlist(playlist_id: str, get_raw: bool = False): 
     """
-    > playlist_id: str
-        ? Playlist ID
-    > track_count: int|str = "*"
-        ? Number of tracks to return, default is all (that are able to be scrapped from the playlist on first load)
-    > get_a_other_albums: bool|int = False
-        ? Get the artist's other albums, normally 5 unless user specifies otherwise
+    % Get a playlist from Spotify
+        > playlist_id: str
+            ? Playlist ID
+        > get_raw: bool = False
+            ? Get the raw response from the API wrapper
     """
-    pass
+    if not get_raw:
+        pass
+    else:
+        return wrapper.get_playlist(playlist_id)
 
-@router.get("/artist", response_model=Artist|dict)
-def artist(artist_id: str):
+@router.get("/artist")
+def artist(artist_id: str, get_raw: bool = False):
     """
-    > artist_id: str
-        ? Artist ID
-    > get_popular_tracks: bool|int = False
-        ? Get the artist's popular tracks, normally 5 unless user specifies otherwise
-    > get_popular_discography: bool|int = False
-        ? Get the artist's popular discography, normally 5 unless user specifies otherwise
+    % Get an artist from Spotify
+        > artist_id: str
+            ? Artist ID
+        > get_raw: bool = False
+            ? Get the raw response from the API wrapper
     """
-    pass
+    if not get_raw:
+        pass
+    else:
+        return wrapper.get_artist(artist_id)
 
-@router.get("/album", response_model=Album|dict)
-def album(album_id: str):
+@router.get("/album")
+def album(album_id: str, get_raw: bool = False):
     """
-    > album_id: str
-        ? Album ID
-    > track_count: int|str = "*"
-        ? Number of tracks to return, default is all
-    > get_a_other_albums: bool|int = False
-        ? Get the artist's other albums, normally 5 unless user specifies otherwise
+    % Get an album from Spotify
+        > album_id: str
+            ? Album ID
+        > get_raw: bool = False
+            ? Get the raw response from the API wrapper
     """
-    pass
+    if not get_raw:
+        pass
+    else:
+        return wrapper.get_album(album_id)
