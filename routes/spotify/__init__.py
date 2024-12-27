@@ -20,9 +20,11 @@ def track(track_id: str, get_raw: bool = False):
             ? Get the raw response from the API wrapper
     """
     raw_data = wrapper.get_track(track_id)
+    if not raw_data:
+        return {"status": "error", "data": "Either the track was not found, we are being rate limited, or there was an error with the request."}
 
     if get_raw:
-        return raw_data
+        return {"status": "success", "data": raw_data}
     else:
         artist_data = raw_data["firstArtist"]["items"][0]
         main_artist = {
@@ -48,30 +50,33 @@ def track(track_id: str, get_raw: bool = False):
         track_album_cover_data = track_album_data["coverArt"]
         duration = raw_data["duration"]["totalMilliseconds"]
         return {
-            "title": raw_data["name"],
-            "id": raw_data["id"],
-            "uri": raw_data["uri"],
-            "artists": {
-                "main": main_artist,
-                "secondary": secondary_artists
-            },
-            "contentRating": raw_data["contentRating"]["label"],
-            "playCount": raw_data["playcount"],
-            "duration": {
-                "milliseconds": duration,
-                "seconds": duration / 1000, 
-                "minutes": duration / 60000
-            },
-            "trackAlbum": {
-                "title": track_album_data["name"],
-                "id": track_album_data["id"],
-                "uri": track_album_data["uri"],
-                "type": track_album_data["type"],
-                "date": track_album_data["date"],
-                "tracks": [track["track"] for track in track_album_data["tracks"]["items"]],
-                "coverData": {
-                    "colors": track_album_cover_data["extractedColors"]["colorRaw"],
-                    "sources": track_album_cover_data["sources"]
+            "status": "success",
+            "data": {
+                "title": raw_data["name"],
+                "id": raw_data["id"],
+                "uri": raw_data["uri"],
+                "artists": {
+                    "main": main_artist,
+                    "secondary": secondary_artists
+                },
+                "contentRating": raw_data["contentRating"]["label"],
+                "playCount": raw_data["playcount"],
+                "duration": {
+                    "milliseconds": duration,
+                    "seconds": duration / 1000, 
+                    "minutes": duration / 60000
+                },
+                "trackAlbum": {
+                    "title": track_album_data["name"],
+                    "id": track_album_data["id"],
+                    "uri": track_album_data["uri"],
+                    "type": track_album_data["type"],
+                    "date": track_album_data["date"],
+                    "tracks": [track["track"] for track in track_album_data["tracks"]["items"]],
+                    "coverData": {
+                        "colors": track_album_cover_data["extractedColors"]["colorRaw"],
+                        "sources": track_album_cover_data["sources"]
+                    }
                 }
             }
         }
@@ -85,10 +90,14 @@ def playlist(playlist_id: str, get_raw: bool = False):
         > get_raw: bool = False
             ? Get the raw response from the API wrapper
     """
+    raw_data = wrapper.get_playlist(playlist_id)
+    if not raw_data:
+        return {"status": "error", "data": "Either the playlist was not found, we are being rate limited, or there was an error with the request."}
+    
     if not get_raw:
         pass
     else:
-        return wrapper.get_playlist(playlist_id)
+        return {"status": "success", "data": raw_data}
 
 @router.get("/artist")
 def artist(artist_id: str, get_raw: bool = False):
@@ -99,10 +108,14 @@ def artist(artist_id: str, get_raw: bool = False):
         > get_raw: bool = False
             ? Get the raw response from the API wrapper
     """
+    raw_data = wrapper.get_artist(artist_id)
+    if not raw_data:
+        return {"status": "error", "data": "Either the artist was not found, we are being rate limited, or there was an error with the request."}
+    
     if not get_raw:
         pass
     else:
-        return wrapper.get_artist(artist_id)
+        return {"status": "success", "data": raw_data}
 
 @router.get("/album")
 def album(album_id: str, get_raw: bool = False):
@@ -113,7 +126,11 @@ def album(album_id: str, get_raw: bool = False):
         > get_raw: bool = False
             ? Get the raw response from the API wrapper
     """
+    raw_data = wrapper.get_album(album_id)
+    if not raw_data:
+        return {"status": "error", "data": "Either the album was not found, we are being rate limited, or there was an error with the request."}
+    
     if not get_raw:
         pass
     else:
-        return wrapper.get_album(album_id)
+        return {"status": "success", "data": raw_data}
