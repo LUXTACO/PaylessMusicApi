@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = fastapi.FastAPI()
 app.include_router(spotify_router)
-app.include_router(youtube_music_router)
+#TODO: Include all other routers
 init_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 app.add_middleware(
