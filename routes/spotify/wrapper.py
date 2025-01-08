@@ -53,6 +53,7 @@ class Wrapper:
             "operationName": "queryArtistOverview",
             "variables": json.dumps({"uri": f"spotify:artist:{artist_id}", "locale": ""}),
             "extensions": json.dumps({"persistedQuery": {"version":1,"sha256Hash":"4bc52527bb77a5f8bbb9afe491e9aa725698d29ab73bff58d49169ee29800167"}})
+            #? sha256Hash might need to be updated if the query changes
         })), headers=self.get_headers())
         if response.status_code == 200:
             logger.info("Successfully retrieved artist from Spotify.")
@@ -67,6 +68,7 @@ class Wrapper:
             "operationName": "getAlbum",
             "variables": json.dumps({"uri": f"spotify:album:{album_id}", "locale": "", "offset": offset, "limit": limit}), #? default limit is 50 and offset is 0
             "extensions": json.dumps({"persistedQuery": {"version":1,"sha256Hash":"8f4cd5650f9d80349dbe68684057476d8bf27a5c51687b2b1686099ab5631589"}})
+            #? sha256Hash might need to be updated if the query changes
         })), headers=self.get_headers())
         if response.status_code == 200:
             logger.info("Successfully retrieved playlist from Spotify.")
