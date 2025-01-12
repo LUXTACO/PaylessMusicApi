@@ -13,7 +13,7 @@ PaylessMusicApi is a free and open-source API that allows you to access music da
 
 1. Clone the repository:
     ```sh
-    git clone https://github.com/yourusername/PaylessMusicApi.git
+    git clone https://github.com/LUXTACO/PaylessMusicApi.git
     cd PaylessMusicApi
     ```
 
@@ -24,7 +24,7 @@ PaylessMusicApi is a free and open-source API that allows you to access music da
 
 3. Run the application:
     ```sh
-    uvicorn main:app --reload
+    uvicorn main:app --host 0.0.0.0 --port 8000
     ```
 
 ## Usage
