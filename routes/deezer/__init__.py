@@ -4,8 +4,8 @@ from fastapi import APIRouter, Depends, Request
 
 logger = logging.getLogger(__name__)
 router = APIRouter(
-    prefix="/youtube_music",
-    tags=["Youtube Music"],
+    prefix="/deezer",
+    tags=["Deezer"],
     responses={404: {"description": "Not found"}},
 )
 wrapper = Wrapper()
