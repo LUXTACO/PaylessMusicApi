@@ -42,7 +42,7 @@ class Wrapper:
         })), headers=self.get_headers())
         if response.status_code == 200:
             logger.info("Successfully retrieved playlist from Spotify.")
-            return response.json()["data"]
+            return response.json()["data"]["artistUnion"]
         else:
             logger.error(f"Failed to retrieve playlist from Spotify. Status code: {response.status_code}")
             return False
