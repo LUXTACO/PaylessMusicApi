@@ -188,8 +188,7 @@ def artist(artist_id: str, get_raw: bool = False):
         profile_data = raw_data["profile"]
         pinned_item_data = profile_data["pinnedItem"]
         pinned_item_content_data = pinned_item_data["itemV2"]["data"]
-        related_content_data = profile_data["relatedContent"]
-        
+        related_content_data = raw_data["relatedContent"]
         
         appears_on = []
         for appearance in related_content_data["appearsOn"]["items"]:
@@ -206,6 +205,17 @@ def artist(artist_id: str, get_raw: bool = False):
                     })
             except [KeyError, IndexError]:
                 logger.error(f"Failed to retrieve data for {appearance}.")
+            except Exception as e:
+                logger.error(f"An error occurred: {e}")
+                
+        discovered_on = []
+        for discovery in related_content_data["discoveredOnV2"]["items"]:
+            try:
+                discovery = discovery["data"]
+                if discovery["__typename"] != "GenericError":
+                    pass
+            except [KeyError, IndexError]:
+                logger.error(f"Failed to retrieve data for {discovery}.")
             except Exception as e:
                 logger.error(f"An error occurred: {e}")
          
