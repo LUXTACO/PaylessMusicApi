@@ -209,13 +209,31 @@ def artist(artist_id: str, get_raw: bool = False):
                 logger.error(f"An error occurred: {e}")
                 
         discovered_on = []
-        for discovery in related_content_data["discoveredOnV2"]["items"]:
+        for discovery in related_content_data["discoveredOnV2"]["items"]: #? Might need to be updated if the response changes
             try:
+                #TODO: Add other typenames (if there are any)
                 discovery = discovery["data"]
-                if discovery["__typename"] != "GenericError":
-                    pass
+                if discovery["__typename"] == "Playlist":
+                    data = discovery["data"]
+                    discovered_on.append({
+                        "title": data["name"],
+                        "id": data["uri"].split(":")[-1],
+                        "uri": data["uri"],
+                        "owner": data["ownerV2"]["data"]["name"], #? Might need to be updated if the response changes
+                        "images": [image["sources"] for image in data["images"]["items"]],
+                        "description": data["description"],
+                    })
             except [KeyError, IndexError]:
                 logger.error(f"Failed to retrieve data for {discovery}.")
+            except Exception as e:
+                logger.error(f"An error occurred: {e}")
+                
+        featuring = []
+        for feature in related_content_data["featuringV2"]["items"]:
+            try:
+                pass
+            except [KeyError, IndexError]:
+                logger.error(f"Failed to retrieve data for {feature}.")
             except Exception as e:
                 logger.error(f"An error occurred: {e}")
          
@@ -268,6 +286,7 @@ def artist(artist_id: str, get_raw: bool = False):
                 },
                 "relatedContent": {
                     "appearsOn": appears_on,
+                    "discoveredOn": discovered_on,
                 }
             }
         }
