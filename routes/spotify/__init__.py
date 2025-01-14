@@ -175,7 +175,71 @@ def artist(artist_id: str, get_raw: bool = False):
     if get_raw:
         return {"status": "success", "data": raw_data}
     else:
-        pass
+        profile_data = raw_data["profile"]
+        pinned_item_data = profile_data["pinnedItem"]
+        pinned_item_content_data = pinned_item_data["itemV2"]["data"]
+        related_content_data = profile_data["relatedContent"]
+        
+        appears_on = []
+        for appearance in related_content_data["appearsOn"]["items"]:
+            for data in appearance["releases"]["items"]:
+                appears_on.append({
+                    "title": data["name"],
+                    "id": data["uri"].split(":")[-1],
+                    "uri": data["uri"],
+                    "type": data["type"],
+                    "date": data["date"],
+                    "artists": [data["profile"]["name"] for data in data["artists"]["items"]],
+                    "coverData": data["coverArt"]["sources"],
+                })
+        
+        profile_playlists = []
+        for playlist in profile_data["playlistsV2"]["items"]:
+            playlist = playlist["data"]
+            profile_playlists.append({
+                "title": playlist["name"],
+                "id": playlist["uri"].split(":")[-1],
+                "uri": playlist["uri"],
+                "description": playlist["description"],
+                "images": playlist["images"]["items"],
+                "owner": playlist["ownerV2"]["data"]["name"],
+            })
+        
+        return {
+            "status": "success",
+            "data": {
+                "name": profile_data["name"],
+                "id": raw_data["uri"].split(":")[-1],
+                "uri": raw_data["uri"],
+                "verified": profile_data["verified"],
+                "profile": {
+                    "biography": profile_data["biography"],
+                    "externalLinks": profile_data["externalLinks"]["items"],
+                    "pinnedItem": {
+                        "title": pinned_item_data["title"],
+                        "subtitle": pinned_item_data["subtitle"],
+                        "type": pinned_item_data["type"],
+                        "uri": pinned_item_data["uri"],
+                        "comment": pinned_item_data["comment"],
+                        "assets": {
+                            "backgroundImage": pinned_item_data["backgroundImageV2"]["data"]["sources"], #? Might need to be updated if the response changes
+                            "thumbnailImage": pinned_item_data["thumbnailImage"]["data"]["sources"],
+                        },
+                        "itemData": {
+                            "title": pinned_item_content_data["name"],
+                            "id": pinned_item_content_data["uri"].split(":")[-1],
+                            "uri": pinned_item_content_data["uri"],
+                            "type": pinned_item_content_data["type"],
+                            "coverData": pinned_item_content_data["coverArt"]["sources"],
+                        }
+                    },
+                    "playlists": profile_playlists
+                },
+                "relatedContent": {
+                    
+                }
+            }
+        }
 
 @router.get("/album")
 def album(album_id: str, get_raw: bool = False):
