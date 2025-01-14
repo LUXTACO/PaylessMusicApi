@@ -38,13 +38,18 @@ def track(track_id: str, get_raw: bool = False):
         artists = raw_data["otherArtists"]["items"]
         secondary_artists = []
         for artist_data in artists:
-            secondary_artists.append({
-                "name": artist_data["profile"]["name"],
-                "id": artist_data["uri"].split(":")[-1],
-                "uri": artist_data["uri"],
-                "avatar": artist_data["visuals"]["avatarImage"]["sources"],
-                "relatedArtists": artist_data["relatedContent"]["relatedArtists"]["items"],
-            })
+            try:
+                secondary_artists.append({
+                    "name": artist_data["profile"]["name"],
+                    "id": artist_data["uri"].split(":")[-1],
+                    "uri": artist_data["uri"],
+                    "avatar": artist_data["visuals"]["avatarImage"]["sources"],
+                    "relatedArtists": artist_data["relatedContent"]["relatedArtists"]["items"],
+                })
+            except [KeyError, IndexError]:
+                logger.error(f"Failed to retrieve data for {artist_data}.")
+            except Exception as e:
+                logger.error(f"An error occurred: {e}")
             
         track_album_data = raw_data["albumOfTrack"]
         track_album_cover_data = track_album_data["coverArt"]
@@ -102,44 +107,49 @@ def playlist(playlist_id: str, offset: int = 0, limit: int = 50, get_raw: bool =
         playlist_contents = raw_data["content"]["items"]
         playlist_tracks = []
         for item in playlist_contents:
-            track_data = item["itemV2"]["data"] #? Might need to be updated if the response changes
-            track_album_data = track_data["albumOfTrack"]
-            track_album_cover_data = track_album_data["coverArt"]
-            artists = track_data["artists"]["items"]
-            duration = track_data["trackDuration"]["totalMilliseconds"]
-                
-            playlist_tracks.append({
-                "title": track_data["name"],
-                "id": track_data["uri"].split(":")[-1],
-                "uri": track_data["uri"],
-                "artists": [{
-                    "name": artist["profile"]["name"],
-                    "id": artist["uri"].split(":")[-1],
-                    "uri": artist["uri"],
-                } for artist in artists],
-                "contentRating": track_data["contentRating"]["label"],
-                "playCount": track_data["playcount"],
-                "duration": {
-                    "milliseconds": duration,
-                    "seconds": duration / 1000,
-                    "minutes": duration / 60000
-                },
-                "trackAlbum": {
-                    "title": track_album_data["name"],
-                    "id": track_album_data["uri"].split(":")[-1],
-                    "uri": track_album_data["uri"],
+            try:
+                track_data = item["itemV2"]["data"] #? Might need to be updated if the response changes
+                track_album_data = track_data["albumOfTrack"]
+                track_album_cover_data = track_album_data["coverArt"]
+                artists = track_data["artists"]["items"]
+                duration = track_data["trackDuration"]["totalMilliseconds"]
+                    
+                playlist_tracks.append({
+                    "title": track_data["name"],
+                    "id": track_data["uri"].split(":")[-1],
+                    "uri": track_data["uri"],
                     "artists": [{
                         "name": artist["profile"]["name"],
                         "id": artist["uri"].split(":")[-1],
                         "uri": artist["uri"],
-                    } for artist in track_album_data["artists"]["items"]],
-                    "coverData": {
-                        "sources": track_album_cover_data["sources"]
-                    }
-                },
-                "discNumber": track_data["discNumber"],
-                "trackNumber": track_data["trackNumber"],
-            })
+                    } for artist in artists],
+                    "contentRating": track_data["contentRating"]["label"],
+                    "playCount": track_data["playcount"],
+                    "duration": {
+                        "milliseconds": duration,
+                        "seconds": duration / 1000,
+                        "minutes": duration / 60000
+                    },
+                    "trackAlbum": {
+                        "title": track_album_data["name"],
+                        "id": track_album_data["uri"].split(":")[-1],
+                        "uri": track_album_data["uri"],
+                        "artists": [{
+                            "name": artist["profile"]["name"],
+                            "id": artist["uri"].split(":")[-1],
+                            "uri": artist["uri"],
+                        } for artist in track_album_data["artists"]["items"]],
+                        "coverData": {
+                            "sources": track_album_cover_data["sources"]
+                        }
+                    },
+                    "discNumber": track_data["discNumber"],
+                    "trackNumber": track_data["trackNumber"],
+                })
+            except [KeyError, IndexError]:
+                logger.error(f"Failed to retrieve data for {item}.")
+            except Exception as e:
+                logger.error(f"An error occurred: {e}")
         
         return {
             "status": "success",
@@ -180,30 +190,41 @@ def artist(artist_id: str, get_raw: bool = False):
         pinned_item_content_data = pinned_item_data["itemV2"]["data"]
         related_content_data = profile_data["relatedContent"]
         
+        
         appears_on = []
         for appearance in related_content_data["appearsOn"]["items"]:
-            for data in appearance["releases"]["items"]:
-                appears_on.append({
-                    "title": data["name"],
-                    "id": data["uri"].split(":")[-1],
-                    "uri": data["uri"],
-                    "type": data["type"],
-                    "date": data["date"],
-                    "artists": [data["profile"]["name"] for data in data["artists"]["items"]],
-                    "coverData": data["coverArt"]["sources"],
-                })
-        
+            try:
+                for data in appearance["releases"]["items"]:
+                    appears_on.append({
+                        "title": data["name"],
+                        "id": data["uri"].split(":")[-1],
+                        "uri": data["uri"],
+                        "type": data["type"],
+                        "date": data["date"],
+                        "artists": [data["profile"]["name"] for data in data["artists"]["items"]],
+                        "coverData": data["coverArt"]["sources"],
+                    })
+            except [KeyError, IndexError]:
+                logger.error(f"Failed to retrieve data for {appearance}.")
+            except Exception as e:
+                logger.error(f"An error occurred: {e}")
+         
         profile_playlists = []
         for playlist in profile_data["playlistsV2"]["items"]:
-            playlist = playlist["data"]
-            profile_playlists.append({
-                "title": playlist["name"],
-                "id": playlist["uri"].split(":")[-1],
-                "uri": playlist["uri"],
-                "description": playlist["description"],
-                "images": playlist["images"]["items"],
-                "owner": playlist["ownerV2"]["data"]["name"],
-            })
+            try: 
+                playlist = playlist["data"]
+                profile_playlists.append({
+                    "title": playlist["name"],
+                    "id": playlist["uri"].split(":")[-1],
+                    "uri": playlist["uri"],
+                    "description": playlist["description"],
+                    "images": playlist["images"]["items"],
+                    "owner": playlist["ownerV2"]["data"]["name"],
+                })
+            except [KeyError, IndexError]:
+                logger.error(f"Failed to retrieve data for {playlist}.")
+            except Exception as e:
+                logger.error(f"An error occurred: {e}")
         
         return {
             "status": "success",
@@ -236,7 +257,7 @@ def artist(artist_id: str, get_raw: bool = False):
                     "playlists": profile_playlists
                 },
                 "relatedContent": {
-                    
+                    "appearsOn": appears_on,
                 }
             }
         }
