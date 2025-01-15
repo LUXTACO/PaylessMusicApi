@@ -89,7 +89,7 @@ class Wrapper:
         else:
             if self.access_token_uses is None or self.access_token_uses >= 1:
                 self._get_access_token()
-            if (datetime.datetime.now() - self.client_token_timestamp).seconds > 1216800:
+            if (datetime.datetime.now() - self.client_token_timestamp).seconds > 1200000:
                 self._get_client_token()
     
     def _get_access_token(self):
