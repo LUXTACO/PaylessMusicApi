@@ -200,6 +200,7 @@ def artist(artist_id: str, get_raw: bool = False):
             pinned_item_content_data = pinned_item_data["itemV2"]["data"]
             logger.info(f"Pinned item data: {pinned_item_data}")
             related_content_data = raw_data["relatedContent"]
+            artists_statistics = raw_data["stats"]
             logger.info(f"Related content data: {related_content_data}")
             
             
@@ -257,6 +258,15 @@ def artist(artist_id: str, get_raw: bool = False):
                     logger.error(f"Failed to retrieve data for {feature}.")
                 except Exception as e:
                     logger.error(f"An error occurred: {e}")
+                
+            related_artists = []
+            for artist in related_content_data["relatedArtists"]["items"]:
+                related_artists.append({
+                    "name": artist["profile"]["name"],
+                    "id": artist["uri"].split(":")[-1],
+                    "uri": artist["uri"],
+                    "avatar": artist["visuals"]["avatarImage"]["sources"],
+                })
             
             profile_playlists = []
             for playlist in profile_data["playlistsV2"]["items"]:
@@ -274,6 +284,46 @@ def artist(artist_id: str, get_raw: bool = False):
                     logger.error(f"Failed to retrieve data for {playlist}.")
                 except Exception as e:
                     logger.error(f"An error occurred: {e}")
+            
+            topCountries = []
+            for city in artists_statistics["topCities"]["items"]:
+                country = city["country"]
+                listeners = city["listeners"]
+                for topCountry in topCountries:
+                    if topCountry["country"] == country:
+                        topCountry["listeners"] += listeners
+                        break
+                else:
+                    topCountries.append({
+                        "country": country,
+                        "listeners": listeners,
+                    })
+            topCountries = sorted(topCountries, key=lambda x: x["listeners"], reverse=True)
+            
+            topRegions = []
+            for city in artists_statistics["topCities"]["items"]:
+                region = city["region"]
+                listeners = city["listeners"]
+                for topRegion in topRegions:
+                    if topRegion["region"] == region:
+                        topRegion["listeners"] += listeners
+                        break
+                else:
+                    topRegions.append({
+                        "region": region,
+                        "listeners": listeners,
+                    })
+            topRegions = sorted(topRegions, key=lambda x: x["listeners"], reverse=True)
+            
+            topCities = []
+            for city in artists_statistics["topCities"]["items"]:
+                topCities.append({
+                    "city": city["city"],
+                    "country": city["country"],
+                    "region": city["region"],
+                    "listeners": city["listeners"],
+                })
+            topCities = sorted(topCities, key=lambda x: x["listeners"], reverse=True)
             
             return {
                 "status": "success",
@@ -309,7 +359,16 @@ def artist(artist_id: str, get_raw: bool = False):
                     "relatedContent": {
                         "appearsOn": appears_on,
                         "discoveredOn": discovered_on,
-                        "featuredIn": featured_in
+                        "featuredIn": featured_in,
+                        "relatedArtists": related_artists
+                    },
+                    "stats": {
+                        "followers": artists_statistics["followers"],
+                        "monthlyListeners": artists_statistics["monthlyListeners"],
+                        "worldRank": artists_statistics["worldRank"],
+                        "topCities": topCities,
+                        "topCountries": topCountries,
+                        "topRegions": topRegions,
                     }
                 }
             }
