@@ -200,7 +200,8 @@ def artist(artist_id: str, get_raw: bool = False):
             pinned_item_content_data = pinned_item_data["itemV2"]["data"]
             logger.info(f"Pinned item data: {pinned_item_data}")
             related_content_data = raw_data["relatedContent"]
-            artists_statistics = raw_data["stats"]
+            artist_statistics = raw_data["stats"]
+            artist_concerts = raw_data["goods"]["events"]["concerts"]
             logger.info(f"Related content data: {related_content_data}")
             
             
@@ -285,45 +286,61 @@ def artist(artist_id: str, get_raw: bool = False):
                 except Exception as e:
                     logger.error(f"An error occurred: {e}")
             
-            topCountries = []
-            for city in artists_statistics["topCities"]["items"]:
+            top_countries = []
+            for city in artist_statistics["topCities"]["items"]:
                 country = city["country"]
                 listeners = city["listeners"]
-                for topCountry in topCountries:
-                    if topCountry["country"] == country:
-                        topCountry["listeners"] += listeners
+                for country in top_countries:
+                    if country["country"] == country:
+                        country["listeners"] += listeners
                         break
                 else:
-                    topCountries.append({
+                    top_countries.append({
                         "country": country,
                         "listeners": listeners,
                     })
-            topCountries = sorted(topCountries, key=lambda x: x["listeners"], reverse=True)
+            top_countries = sorted(top_countries, key=lambda x: x["listeners"], reverse=True)
             
-            topRegions = []
-            for city in artists_statistics["topCities"]["items"]:
+            top_regions = []
+            for city in artist_statistics["topCities"]["items"]:
                 region = city["region"]
                 listeners = city["listeners"]
-                for topRegion in topRegions:
-                    if topRegion["region"] == region:
-                        topRegion["listeners"] += listeners
+                for region in top_regions:
+                    if region["region"] == region:
+                        region["listeners"] += listeners
                         break
                 else:
-                    topRegions.append({
+                    top_regions.append({
                         "region": region,
                         "listeners": listeners,
                     })
-            topRegions = sorted(topRegions, key=lambda x: x["listeners"], reverse=True)
+            top_regions = sorted(top_regions, key=lambda x: x["listeners"], reverse=True)
             
-            topCities = []
-            for city in artists_statistics["topCities"]["items"]:
-                topCities.append({
+            top_cities = []
+            for city in artist_statistics["topCities"]["items"]:
+                top_cities.append({
                     "city": city["city"],
                     "country": city["country"],
                     "region": city["region"],
                     "listeners": city["listeners"],
                 })
-            topCities = sorted(topCities, key=lambda x: x["listeners"], reverse=True)
+            top_cities = sorted(top_cities, key=lambda x: x["listeners"], reverse=True)
+            
+            concerts = []
+            for concert in artist_concerts["items"]:
+                try:
+                    concerts.append({
+                        "title": concert["title"],
+                        "id": concert["uri"].split(":")[-1],
+                        "uri": concert["uri"],
+                        "date": concert["date"]["isoString"],
+                        "location": concert["venue"],
+                        "isFestival": concert["festival"],
+                    })
+                except (KeyError, IndexError):
+                    logger.error(f"Failed to retrieve data for {concert}.")
+                except Exception as e:
+                    logger.error(f"An error occurred: {e}")
             
             return {
                 "status": "success",
@@ -362,14 +379,15 @@ def artist(artist_id: str, get_raw: bool = False):
                         "featuredIn": featured_in,
                         "relatedArtists": related_artists
                     },
-                    "stats": {
-                        "followers": artists_statistics["followers"],
-                        "monthlyListeners": artists_statistics["monthlyListeners"],
-                        "worldRank": artists_statistics["worldRank"],
-                        "topCities": topCities,
-                        "topCountries": topCountries,
-                        "topRegions": topRegions,
-                    }
+                    "statistics": {
+                        "followers": artist_statistics["followers"],
+                        "monthlyListeners": artist_statistics["monthlyListeners"],
+                        "worldRank": artist_statistics["worldRank"],
+                        "topCities": top_cities,
+                        "topCountries": top_countries,
+                        "topRegions": top_regions,
+                    },
+                    "concerts": concerts
                 }
             }
     except Exception as e:
