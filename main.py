@@ -1,14 +1,16 @@
+import redis
 import fastapi
 import uvicorn
 import logging
 import datetime
 from routes import *
-from helpers import RemovePyExtensionFilter
 from fastapi.middleware.cors import CORSMiddleware
+from helpers import RemovePyExtensionFilter, RateLimitService
 
 app = fastapi.FastAPI()
 app.include_router(spotify_router)
 #TODO: Include all other routers
+redis_client = redis.Redis(host="redis", port=6379)
 init_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 app.add_middleware(
@@ -27,6 +29,7 @@ logging.basicConfig(
     handlers=[stream_handler],
 )
 logger = logging.getLogger(__name__)
+ratelimiter = RateLimitService(redis_client, 10, 60)
 
 @app.get("/health")
 def health(request: fastapi.Request):

@@ -1,3 +1,4 @@
+redis
 fastapi
 uvicorn
 logging
