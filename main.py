@@ -21,6 +21,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+#TODO: Add ratelimit service
+
 stream_handler = logging.StreamHandler()
 stream_handler.addFilter(RemovePyExtensionFilter())
 logging.basicConfig(
