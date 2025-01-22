@@ -6,7 +6,7 @@ import logging
 import datetime
 from routes import *
 from fastapi.middleware.cors import CORSMiddleware
-from helpers import RemovePyExtensionFilter, RateLimitService
+from helpers import RemovePyExtensionFilter
 
 app = fastapi.FastAPI()
 app.include_router(spotify_router)
