@@ -49,9 +49,9 @@ def track(track_id: str, get_raw: bool = False):
                         "relatedArtists": artist_data["relatedContent"]["relatedArtists"]["items"],
                     })
                 except (KeyError, IndexError):
-                    logger.error(f"Failed to retrieve data for {artist_data}.")
+                    logger.error(f"Failed to retrieve data for {artist_data}. | {traceback.format_exc()}")
                 except Exception as e:
-                    logger.error(f"An error occurred: {e}")
+                    logger.error(f"An error occurred: {e} | {traceback.format_exc()}")
                 
             track_album_data = raw_data["albumOfTrack"]
             track_album_cover_data = track_album_data["coverArt"]
@@ -153,9 +153,9 @@ def playlist(playlist_id: str, offset: int = 0, limit: int = 50, get_raw: bool =
                         "trackNumber": track_data["trackNumber"],
                     })
                 except (KeyError, IndexError):
-                    logger.error(f"Failed to retrieve data for {item}.")
+                    logger.error(f"Failed to retrieve data for {item}. | {traceback.format_exc()}")
                 except Exception as e:
-                    logger.error(f"An error occurred: {e}")
+                    logger.error(f"An error occurred: {e} | {traceback.format_exc()}")
             
             return {
                 "status": "success",
@@ -195,15 +195,15 @@ def artist(artist_id: str, get_raw: bool = False):
         if get_raw:
             return {"status": "success", "data": raw_data}
         else:
+            
+            if "__typename" not in raw_data or raw_data["__typename"] != "Artist":
+                return {"status": "error", "data": "The ID provided is not an artist ID."}
             profile_data = raw_data["profile"]
             pinned_item_data = profile_data["pinnedItem"]
             pinned_item_content_data = pinned_item_data["itemV2"]["data"]
-            logger.info(f"Pinned item data: {pinned_item_data}")
             related_content_data = raw_data["relatedContent"]
             artist_statistics = raw_data["stats"]
             artist_concerts = raw_data["goods"]["events"]["concerts"]
-            logger.info(f"Related content data: {related_content_data}")
-            
             
             appears_on = []
             for appearance in related_content_data["appearsOn"]["items"]:
@@ -219,9 +219,9 @@ def artist(artist_id: str, get_raw: bool = False):
                             "coverData": data["coverArt"]["sources"],
                         })
                 except (KeyError, IndexError):
-                    logger.error(f"Failed to retrieve data for {appearance}.")
+                    logger.error(f"Failed to retrieve data for {appearance}. | {traceback.format_exc()}")
                 except Exception as e:
-                    logger.error(f"An error occurred: {e}")
+                    logger.error(f"An error occurred: {e} | {traceback.format_exc()}")
                     
             discovered_on = []
             for discovery in related_content_data["discoveredOnV2"]["items"]: #? Might need to be updated if the response changes
@@ -233,14 +233,14 @@ def artist(artist_id: str, get_raw: bool = False):
                             "title": discovery["name"],
                             "id": discovery["uri"].split(":")[-1],
                             "uri": discovery["uri"],
-                            "owner": discovery["ownerV2"]["discovery"]["name"], #? Might need to be updated if the response changes
+                            "owner": discovery["ownerV2"]["data"]["name"], #? Might need to be updated if the response changes
                             "images": [image["sources"] for image in discovery["images"]["items"]],
                             "description": discovery["description"],
                         })
                 except (KeyError, IndexError):
-                    logger.error(f"Failed to retrieve data for {discovery}.")
+                    logger.error(f"Failed to retrieve data for {discovery}. | {traceback.format_exc()}")
                 except Exception as e:
-                    logger.error(f"An error occurred: {e}")
+                    logger.error(f"An error occurred: {e} | {traceback.format_exc()}")
                     
             featured_in = []
             for feature in related_content_data["featuringV2"]["items"]:
@@ -251,14 +251,14 @@ def artist(artist_id: str, get_raw: bool = False):
                             "title": feature["name"],
                             "id": feature["uri"].split(":")[-1],
                             "uri": feature["uri"],
-                            "owner": feature["ownerV2"]["discovery"]["name"], #? Might need to be updated if the response changes
+                            "owner": feature["ownerV2"]["data"]["name"], #? Might need to be updated if the response changes
                             "images": [image["sources"] for image in feature["images"]["items"]],
                             "description": feature["description"],
                         })
                 except (KeyError, IndexError):
-                    logger.error(f"Failed to retrieve data for {feature}.")
+                    logger.error(f"Failed to retrieve data for {feature}. | {traceback.format_exc()}")
                 except Exception as e:
-                    logger.error(f"An error occurred: {e}")
+                    logger.error(f"An error occurred: {e} | {traceback.format_exc()}")
                 
             related_artists = []
             for artist in related_content_data["relatedArtists"]["items"]:
@@ -282,14 +282,14 @@ def artist(artist_id: str, get_raw: bool = False):
                         "owner": playlist["ownerV2"]["data"]["name"],
                     })
                 except (KeyError, IndexError):
-                    logger.error(f"Failed to retrieve data for {playlist}.")
+                    logger.error(f"Failed to retrieve data for {playlist}. | {traceback.format_exc()}")
                 except Exception as e:
-                    logger.error(f"An error occurred: {e}")
+                    logger.error(f"An error occurred: {e} | {traceback.format_exc()}")
             
             top_countries = []
             for city in artist_statistics["topCities"]["items"]:
                 country = city["country"]
-                listeners = city["listeners"]
+                listeners = city["numberOfListeners"]
                 for country in top_countries:
                     if country["country"] == country:
                         country["listeners"] += listeners
@@ -304,7 +304,7 @@ def artist(artist_id: str, get_raw: bool = False):
             top_regions = []
             for city in artist_statistics["topCities"]["items"]:
                 region = city["region"]
-                listeners = city["listeners"]
+                listeners = city["numberOfListeners"]
                 for region in top_regions:
                     if region["region"] == region:
                         region["listeners"] += listeners
@@ -322,7 +322,7 @@ def artist(artist_id: str, get_raw: bool = False):
                     "city": city["city"],
                     "country": city["country"],
                     "region": city["region"],
-                    "listeners": city["listeners"],
+                    "listeners": city["numberOfListeners"],
                 })
             top_cities = sorted(top_cities, key=lambda x: x["listeners"], reverse=True)
             
@@ -334,13 +334,13 @@ def artist(artist_id: str, get_raw: bool = False):
                         "id": concert["uri"].split(":")[-1],
                         "uri": concert["uri"],
                         "date": concert["date"]["isoString"],
-                        "location": concert["venue"],
+                        "venue": concert["venue"],
                         "isFestival": concert["festival"],
                     })
                 except (KeyError, IndexError):
-                    logger.error(f"Failed to retrieve data for {concert}.")
+                    logger.error(f"Failed to retrieve data for {concert}. | {traceback.format_exc()}")
                 except Exception as e:
-                    logger.error(f"An error occurred: {e}")
+                    logger.error(f"An error occurred: {e} | {traceback.format_exc()}")
             
             return {
                 "status": "success",
@@ -367,8 +367,8 @@ def artist(artist_id: str, get_raw: bool = False):
                                 "title": pinned_item_content_data["name"],
                                 "id": pinned_item_content_data["uri"].split(":")[-1],
                                 "uri": pinned_item_content_data["uri"],
-                                "type": pinned_item_content_data["type"],
-                                "coverData": pinned_item_content_data["coverArt"]["sources"],
+                                "type": pinned_item_content_data["__typename"].upper(),
+                                "coverData": pinned_item_content_data["coverArt"]["sources"] if "coverArt" in pinned_item_content_data else None,
                             }
                         },
                         "playlists": profile_playlists
