@@ -387,7 +387,18 @@ def artist(artist_id: str, get_raw: bool = False):
                         "topCountries": top_countries,
                         "topRegions": top_regions,
                     },
-                    "concerts": concerts
+                    "concerts": concerts,
+                    "visuals": {
+                        "avatar": {
+                            "colors": raw_data["visuals"]["avatarImage"]["extractedColors"]["colorRaw"]["hex"],
+                            "sources": raw_data["visuals"]["avatarImage"]["sources"],
+                        },
+                        "gallery": raw_data["visuals"]["gallery"]["items"],
+                        "header": {
+                            "colors": raw_data["visuals"]["headerImage"]["extractedColors"]["colorRaw"]["hex"],
+                            "sources": raw_data["visuals"]["headerImage"]["sources"],
+                        }
+                    }
                 }
             }
     except Exception as e:

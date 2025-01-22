@@ -34,7 +34,7 @@ PaylessMusicApi is a free and open-source API that allows you to access music da
 - **Spotify**
   - [x] `/spotify/track?track_id={track_id}&get_raw={get_raw}`
   - [x] `/spotify/playlist?playlist_id={playlist_id}&offset={offset}&limit={limit}&get_raw={get_raw}`
-  - [ ] `/spotify/artist?artist_id={artist_id}&get_raw={get_raw}`
+  - [x] `/spotify/artist?artist_id={artist_id}&get_raw={get_raw}`
   - [ ] `/spotify/album?album_id={album_id}&get_raw={get_raw}`
 
 - **YouTube Music**
