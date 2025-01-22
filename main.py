@@ -1,5 +1,4 @@
 import os
-import redis
 import fastapi
 import uvicorn
 import logging
