@@ -77,6 +77,25 @@ class Wrapper:
             logger.error(f"Failed to retrieve playlist from Spotify. Status code: {response.status_code}")
             return False
     
+    def perform_search(self, query: str, offset: int, limit: int, top_results_num: int) -> bool|dict:
+        logger.info("Performing search on Spotify...")
+        response = requests.get(("https://api-partner.spotify.com/pathfinder/v1/query?" + urllib.parse.urlencode({
+            "operationName": "searchDesktop",
+            "variables": json.dumps({
+                "searchTerm": query, "offset": offset, "limit": limit, "numberOfTopResults": top_results_num,
+                "includeAudiobooks": True, "includeArtistHasConcertsField": True, "includePreReleases": True,
+                "includeLocalConcertsField": True
+            }), #? default limit is 10 and offset is  | default top_results_num is 5
+            "extensions": json.dumps({"persistedQuery": {"version":1,"sha256Hash":"dd1513013a4ab0d9c095eac6b6d292c801bef038e11e06b746385a509be24ab0"}})
+            #? sha256Hash might need to be updated if the query changes
+        })), headers=self.get_headers())
+        if response.status_code == 200:
+            logger.info("Successfully performed search on Spotify.")
+            return response.json()["data"]["searchV2"] #? This might change if searchV2 is updated
+        else:
+            logger.error(f"Failed to perform search on Spotify. Status code: {response.status_code}")
+            return False
+    
     def get_headers(self):
         self._update_tokens()
         return {"Accept": "*/*", "Authorization": f"Bearer {self.access_token}", "Client-Token": self.client_token}

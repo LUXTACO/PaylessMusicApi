@@ -426,3 +426,25 @@ def album(album_id: str, get_raw: bool = False):
     except Exception as e:
         logger.error(f"An error occurred: {e} - {traceback.format_exc()}")
         return {"status": "error", "data": "An error occurred."}
+    
+@router.get("/search")
+def search(query: str, offset: int = 0, limit: int = 10, top_results_num: int = 5, get_raw: bool = False):
+    """
+    % Search for a track, album, artist, or playlist on Spotify
+        > query: str
+            ? Search query
+        > get_raw: bool = False
+            ? Get the raw response from the API wrapper
+    """
+    try:
+        raw_data = wrapper.perform_search(query, offset, limit, top_results_num)
+        if not raw_data:
+            return {"status": "error", "data": "Something went wrong while searching."}
+        
+        if get_raw:
+            return {"status": "success", "data": raw_data}
+        else:
+            pass
+    except Exception as e:
+        logger.error(f"An error occurred: {e} - {traceback.format_exc()}")
+        return {"status": "error", "data": "An error occurred."}
